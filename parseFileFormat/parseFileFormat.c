@@ -118,7 +118,7 @@ void PrintFileHeaderFormat(unsigned char format)
 int main(int argc, const char *argv[])
 {
 	if (argc < 2) {
-		printf("Usage: %s filename\n", argv[1]);
+		printf("Usage: %s filename\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
