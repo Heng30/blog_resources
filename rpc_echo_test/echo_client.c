@@ -40,11 +40,6 @@ int main(int argc, char **argv)
 		clnt_perror(clnt, server);  
 		exit(EXIT_FAILURE);   
 	}  
-
-	if (!strcmp(result, "Error")){  
-		fprintf(stderr, "%s: error raise", argv[0]);  
-		exit(EXIT_FAILURE);  
-	}  
 	
 	printf("client send: %s\n", message);
 	printf("client recieve: %s\n\n", result);    
