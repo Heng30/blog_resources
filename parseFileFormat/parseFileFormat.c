@@ -9,7 +9,7 @@
 #define FIEL_HEADER_FORMAT_MAX 0XF
 #define FILE_HEADER_FORMAT_END 0X0
 
-/* 文件类型头标识,        最多支持255种标识 */
+/* 文件类型头标，最多支持255种标识 */
 enum fileHeaderFormat {
 	UTF8_BOM = 0X1,
 	UCS2_BE_BOM,

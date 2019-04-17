@@ -40,6 +40,10 @@ set fileencodings=utf-8,gb2312,gbk,gb18030
 set termencoding=utf-8
 set encoding=utf-8
 set t_Co=256
+" inoremap ( ()<ESC>i
+" inoremap [ []<ESC>i
+" inoremap { {}<ESC>i
+" inoremap < <><ESC>i
 
 " 设置包括vundle和初始化相关的runtime path
 filetype off                  
@@ -55,6 +59,9 @@ Bundle 'vim-scripts/OmniCppComplete'
 Bundle 'tpope/vim-commentary'
 Bundle 'kien/ctrlp.vim'
 Bundle 'dkprice/vim-easygrep'
+Bundle 'jiangmiao/auto-pairs'
+Bundle 'airblade/vim-gitgutter'
+Bundle 'tpope/vim-fugitive'
 call vundle#end()           
 set nocp
 filetype plugin indent on    " 加载vim自带和插件相应的语法和文件类型相关脚本
