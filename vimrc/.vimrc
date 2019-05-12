@@ -20,7 +20,7 @@ set ruler " 在状态栏显示光标的当前位置（位于哪一行哪一列�
 set ignorecase " 搜索时忽略大小写
 " set smartcase " 如果同时打开了ignorecase，那么对于只有一个大写字母的搜索词，将大小写敏感；其他情况都是大小写不敏感
 set smartindent " 打开智能缩进
-set fdm=indent 
+set fdm=indent
 set cindent
 set undofile " 保留撤销历史
 " set undodir=~/.vim/.undo//
@@ -46,7 +46,7 @@ set t_Co=256
 " inoremap < <><ESC>i
 
 " 设置包括vundle和初始化相关的runtime path
-filetype off                  
+filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
@@ -56,13 +56,19 @@ Bundle 'vim-airline/vim-airline-themes'
 Bundle 'scrooloose/nerdtree'
 Bundle 'majutsushi/tagbar'
 Bundle 'vim-scripts/OmniCppComplete'
+Bundle 'Valloric/YouCompleteMe'
 Bundle 'tpope/vim-commentary'
 Bundle 'kien/ctrlp.vim'
 Bundle 'dkprice/vim-easygrep'
 Bundle 'jiangmiao/auto-pairs'
 Bundle 'airblade/vim-gitgutter'
 Bundle 'tpope/vim-fugitive'
-call vundle#end()           
+Bundle 'plasticboy/vim-markdown'
+Bundle 'tpope/vim-abolish'
+Bundle 'ntpeters/vim-better-whitespace'
+Bundle 'fatih/vim-go'
+Bundle 'nsf/gocode'
+call vundle#end()
 set nocp
 filetype plugin indent on    " 加载vim自带和插件相应的语法和文件类型相关脚本
 
@@ -87,18 +93,18 @@ let g:airline#extensions#tabline#enabled = 1
 set tags+=~/.vim/tags/tags_usr_include
 set tags+=./tags
 
-let OmniCpp_NamespaceSearch = 1
-let OmniCpp_GlobalScopeSearch = 1
-let OmniCpp_ShowAccess = 1
-let OmniCpp_ShowPrototypeInAbbr = 1 " show function parameters
-let OmniCpp_ShowScopeInAbbr = 1
-let OmniCpp_MayCompleteDot = 1 " autocomplete after .
-let OmniCpp_MayCompleteArrow = 1 " autocomplete after ->
-let OmniCpp_MayCompleteScope = 1 " autocomplete after ::
-let OmniCpp_DefaultNamespaces = ["std", "_GLIBCXX_STD"]
-" automatically open and close the popup menu / preview window
-au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
-set completeopt=menuone,menu,longest,preview
+" let OmniCpp_NamespaceSearch = 1
+" let OmniCpp_GlobalScopeSearch = 1
+" let OmniCpp_ShowAccess = 1
+" let OmniCpp_ShowPrototypeInAbbr = 1 " show function parameters
+" let OmniCpp_ShowScopeInAbbr = 1
+" let OmniCpp_MayCompleteDot = 1 " autocomplete after .
+" let OmniCpp_MayCompleteArrow = 1 " autocomplete after ->
+" let OmniCpp_MayCompleteScope = 1 " autocomplete after ::
+" let OmniCpp_DefaultNamespaces = ["std", "_GLIBCXX_STD"]
+" " automatically open and close the popup menu / preview window
+" au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
+" set completeopt=menuone,menu,longest,preview
 
 " 按下C-P，便可以全局搜索啦。使用C-j, C-k上下翻页，<Enter>打开选中文件,
 " C-t在新标签中打开
@@ -120,7 +126,7 @@ let g:EasyGrepRecursive  = 1 " Recursive searching
 let g:EasyGrepIgnoreCase = 1 " not ignorecase:0
 let g:EasyGrepFilesToExclude = "*.bak, *~, cscope.*, *.a, *.o, *.pyc, *.bak"
 " set grepprg=ag\ --nogroup\ --nocolor
-" \vv or :Grep: \vv命令将在文件中搜索当前光标下的单词, 
+" \vv or :Grep: \vv命令将在文件中搜索当前光标下的单词,
 " :Grep word将搜索"word", 如果加叹号:Grep !word表示全词匹配的方式搜索,
 " Grep也可以带参数, 比如:Grep -ir word, r表示递归目录. i表示不区分大小写.\vV :
 " 全词匹配搜索, 同:Grep !word;
@@ -128,6 +134,16 @@ let g:EasyGrepFilesToExclude = "*.bak, *~, cscope.*, *.a, *.o, *.pyc, *.bak"
 " \vA : 与vV相似, 搜索结果append在上次搜索结果之后;
 " \vr or :Replace :替换;
 " \vo or :GrepOptions:
+
+" youcompleteme config
+let g:syntastic_check_on_open = 0
+let g:ycm_enable_diagnostic_signs = 1
+let g:ycm_enable_diagnostic_highlighting = 0
+let g:ycm_complete_in_comments = 1
+let g:ycm_open_loclist_on_ycm_diags = 1
+let g:ycm_collect_identifiers_from_tags_files = 1
+nnoremap gf :YcmCompleter GoToDefinitionElseDeclaration<CR>
+
 
 if filereadable("~/.vim/cscope/cscope.out")
     cs add ~/.vim/cscope/cscope.out
