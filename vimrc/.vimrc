@@ -16,11 +16,11 @@ set incsearch " 输入搜索模式时，每输入一个字符，就自动跳到�
 set autoindent " 自动缩进
 set laststatus=2 " 是否显示状态栏。0 表示不显示，1 表示只在多窗口时显示，2 表示显示
 set ruler " 在状态栏显示光标的当前位置（位于哪一行哪一列）
-" set showmatch " 光标遇到圆括号、方括号、大括号时，自动高亮对应的另一个圆括号、方括号和大括号
+set showmatch " 光标遇到圆括号、方括号、大括号时，自动高亮对应的另一个圆括号、方括号和大括号
 set ignorecase " 搜索时忽略大小写
 " set smartcase " 如果同时打开了ignorecase，那么对于只有一个大写字母的搜索词，将大小写敏感；其他情况都是大小写不敏感
 set smartindent " 打开智能缩进
-set fdm=indent
+" set fdm=indent " 缩进折叠
 set cindent
 set undofile " 保留撤销历史
 " set undodir=~/.vim/.undo//
@@ -68,6 +68,8 @@ Bundle 'tpope/vim-abolish'
 Bundle 'ntpeters/vim-better-whitespace'
 Bundle 'fatih/vim-go'
 Bundle 'nsf/gocode'
+Bundle 'cpiger/NeoDebug'
+" Bundle 'myitcv/govim'
 call vundle#end()
 set nocp
 filetype plugin indent on    " 加载vim自带和插件相应的语法和文件类型相关脚本
@@ -84,6 +86,9 @@ map <silent> <F2> :TagbarToggle<CR>
 map <C-F12> :!ctags -R -I --sort=yes --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
 " ctags -R --languages=c++ --langmap=c++:+.inl -h +.inl --c++-kinds=+px --fields=+aiKSz --extra=+q --exclude=lex.yy.cc --exclude=copy_lex.yy.cc 生成ctag base
 map <silent> <F4> :!cscope -Rbkq <CR>
+
+let g:go_def_mode='gopls'
+let g:go_info_mode='gopls'
 
 let g:tagbar_width = 30
 let g:Powerline_symbols = 'fancy'
