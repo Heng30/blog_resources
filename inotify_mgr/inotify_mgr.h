@@ -3,7 +3,7 @@
  *	2. 保证经过上面的操作， 通过 inotify_mgr_path_get 函数获取到的目录都是正确的绝对路径
  *	3. sudo sysctl -w fs.inotify.max_user_watches=99999999
  *	4. sudo sysctl -w fs.inotify.max_queued_events=1638400
- *	事件丢失会造成错误，部分节点无法被删除，释放空间
+ *	保证队列要足够大，否则事件丢失会造成错误，部分节点无法被删除，释放空间
  */
 
 #ifndef _INOTIFY_MGR_H_
