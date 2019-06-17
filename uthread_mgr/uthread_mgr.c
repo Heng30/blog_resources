@@ -110,7 +110,9 @@ void uthread_mgr_yeild(uthread_mgr_t *um)
     ut = &um->m_task[um->m_cur_task_index];
     ut->m_status = UTHREAD_TASK_STATUS_SUSPEND;
     um->m_finish_hint--;
-    swapcontext(&ut->m_ctx, &ut->m_main_ctx);
+    if (-1 == swapcontext(&ut->m_ctx, &ut->m_main_ctx)) {
+        UTHREAD_MGR_WARN_LOG("swapcontext error, errno: %d - %s", errno, strerror(errno));
+    }
 }
 
 /* @func:
@@ -123,7 +125,10 @@ void uthread_mgr_resume(uthread_mgr_t *um, int id)
 
     switch(ut->m_status){
         case UTHREAD_TASK_STATUS_INIT:
-            getcontext(&ut->m_ctx);
+            if (-1 == getcontext(&ut->m_ctx)) {
+                UTHREAD_MGR_WARN_LOG("getcontext error, errno: %d - %s", errno, strerror(errno));
+                return ;
+            }
             ut->m_ctx.uc_stack.ss_sp = ut->m_stack;
             ut->m_ctx.uc_stack.ss_size = sizeof(ut->m_stack);
             ut->m_ctx.uc_stack.ss_flags = 0;
@@ -135,7 +140,9 @@ void uthread_mgr_resume(uthread_mgr_t *um, int id)
             ut->m_main_index = um->m_cur_task_index;
             um->m_cur_task_index = id;
             um->m_finish_hint++;
-            swapcontext(&ut->m_main_ctx, &ut->m_ctx);
+            if (-1 == swapcontext(&ut->m_main_ctx, &ut->m_ctx)) {
+                UTHREAD_MGR_WARN_LOG("swapcontext error, errno: %d - %s", errno, strerror(errno));
+            }
             um->m_cur_task_index = ut->m_main_index;
 
             break;
