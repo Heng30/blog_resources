@@ -33,7 +33,7 @@ log_mgr_t g_lm = {
 	.m_path = {0}, 
 	.m_rotate_size = 1024 * 1024, 
 	.m_log_mask = 63, 
-	.m_is_stdout = false, 
+	.m_is_stdout = true, 
 };
 
 static bool _is_dir_exsit(const char *dir)
@@ -88,7 +88,6 @@ static char _level_char_get(unsigned char level)
  */
 bool log_mgr_init(const char *path, size_t rotate_size, unsigned char log_mask)
 {
-	if (!path) g_lm.m_is_stdout = true;
 	char buf[PATH_MAX] = {0};
 	char *ptr = NULL;
 	size_t len = 0;
@@ -106,7 +105,7 @@ bool log_mgr_init(const char *path, size_t rotate_size, unsigned char log_mask)
 			if (!_is_dir_exsit(buf)) _create_dir(buf, 0755);
 		}
 	}
-	
+	if (path) g_lm.m_is_stdout = false;
 	g_lm.m_log_mask = log_mask;
 	g_lm.m_rotate_size = rotate_size;
     return true;
@@ -116,7 +115,8 @@ bool log_mgr_init(const char *path, size_t rotate_size, unsigned char log_mask)
 /* @func:
  *	写日志文件
  */
-void log_mgr_do(unsigned char level, const char *format, ...) 
+void log_mgr_do(unsigned char level, const char *file, const char *func, int line,
+        const char *format, ...) 
 {
     if (!(level & g_lm.m_log_mask)) return ;
 	time_t nt = 0;
@@ -151,7 +151,8 @@ void log_mgr_do(unsigned char level, const char *format, ...)
 	}
 
 	va_start(vl, format);
-	fprintf(fp, "[%c] [%s] [%s] [%s:%d]: ", level_c, buf, __FILE__, __FUNCTION__, __LINE__);
+	/* fprintf(fp, "[%c] [%s] [%s] [%s:%d]: ", level_c, buf, __FILE__, __FUNCTION__, __LINE__); */
+	fprintf(fp, "[%c] [%s] [%s] [%s:%d]: ", level_c, buf, file, func, line);
 	vfprintf(fp, format, vl); fprintf(fp, "\n"); fflush(fp);
 	va_end(vl);
 	if (!g_lm.m_is_stdout) fclose(fp); 

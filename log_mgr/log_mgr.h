@@ -28,13 +28,13 @@ bool log_mgr_init(const char *path, size_t rotate_size, unsigned char log_mask);
 /* @func:
  *	写日志文件
  */
-void log_mgr_do(unsigned char level, const char *format, ...);
+void log_mgr_do(unsigned char level, const char *file, const char *func, int line, const char *format, ...);
 
-#define log_mgr_trace(format, ...) log_mgr_do(LOG_MGR_LV_TRACE, format, ##__VA_ARGS__)
-#define log_mgr_debug(format, ...) log_mgr_do(LOG_MGR_LV_DEBUG, format, ##__VA_ARGS__)
-#define log_mgr_info(format, ...)  log_mgr_do(LOG_MGR_LV_INFO , format, ##__VA_ARGS__)
-#define log_mgr_warn(format, ...)  log_mgr_do(LOG_MGR_LV_WARN , format, ##__VA_ARGS__)
-#define log_mgr_error(format, ...) log_mgr_do(LOG_MGR_LV_ERROR, format, ##__VA_ARGS__)
-#define log_mgr_fatal(format, ...) log_mgr_do(LOG_MGR_LV_FATAL, format, ##__VA_ARGS__)
+#define log_mgr_trace(format, ...) log_mgr_do(LOG_MGR_LV_TRACE, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+#define log_mgr_debug(format, ...) log_mgr_do(LOG_MGR_LV_DEBUG, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+#define log_mgr_info(format, ...)  log_mgr_do(LOG_MGR_LV_INFO , __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+#define log_mgr_warn(format, ...)  log_mgr_do(LOG_MGR_LV_WARN , __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+#define log_mgr_error(format, ...) log_mgr_do(LOG_MGR_LV_ERROR, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
+#define log_mgr_fatal(format, ...) log_mgr_do(LOG_MGR_LV_FATAL, __FILE__, __FUNCTION__, __LINE__, format, ##__VA_ARGS__)
 
 #endif

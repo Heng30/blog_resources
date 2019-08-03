@@ -71,8 +71,6 @@ bool queue_mgr_free(queue_mgr_t *qm, queue_mgr_ptr_free_t dealloc)
     }
     pthread_mutex_destroy(&qm->m_mutex);
     g_qm_free(qm);
-    g_qm_alloc = NULL;
-    g_qm_free = NULL;
     return true;
 }
 

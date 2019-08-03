@@ -26,8 +26,9 @@
 										EPOLL_MGR_SOCKET_STATUS_ONESHOT)
 									
 
-static epoll_mgr_alloc_t g_em_alloc = NULL;
-static epoll_mgr_free_t g_em_free = NULL;
+static void* _malloc2calloc(size_t size);
+static epoll_mgr_alloc_t g_em_alloc = _malloc2calloc;
+static epoll_mgr_free_t g_em_free = free;
 
 static void* _malloc2calloc(size_t size)
 {
@@ -178,8 +179,8 @@ bool epoll_mgr_mod(epoll_mgr_t *em, int sock, unsigned short status, epoll_mgr_c
 
 	if (status & EPOLL_MGR_SOCKET_STATUS_CLOSE)
 		__sync_fetch_and_or(&em->m_member[sock].m_sock_status, EPOLL_MGR_SOCKET_STATUS_CLOSE);
-	
-	if (arg) {
+
+	if (cb) {
 		em->m_member[sock].m_arg = arg;
 		em->m_member[sock].m_cb = cb;
 	}
@@ -193,9 +194,8 @@ bool epoll_mgr_mod(epoll_mgr_t *em, int sock, unsigned short status, epoll_mgr_c
 	
     ev.data.fd = sock;
 	if (epoll_ctl(em->m_epollfd, EPOLL_CTL_MOD, sock, &ev) == -1) {
-		EPOLL_MGR_WARN_LOG("epoll_ctl add error, epollfd: %d, sock: %d, errno: %d - %s", 
+		EPOLL_MGR_WARN_LOG("epoll_ctl mod error, epollfd: %d, sock: %d, errno: %d - %s", 
 							em->m_epollfd, sock, errno, strerror(errno));
-		getchar();
 		return false;
 	}
 
@@ -245,8 +245,8 @@ void* epoll_mgr_dispatch(void *arg)
 
 	while (true) {
 		if (-1 == (nfds = epoll_wait(em->m_epollfd, ev, em->m_max_event, em->m_timeout))) {
-			EPOLL_MGR_ERROR_LOG("epoll_wait error: %d - %s", errno, strerror(errno));
 			if (errno == EINTR) { errno = 0; continue; }
+            EPOLL_MGR_ERROR_LOG("epoll_wait error: %d - %s", errno, strerror(errno));
 			break;
 		}
 		
