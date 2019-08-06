@@ -23,6 +23,7 @@ static timer_mgr_free_t g_tm_free = free;
 static timer_mgr_t *g_tm = NULL;
 static size_t g_tm_max = TIMER_MAX;
 static bool g_tm_stop = false; /* 是否停止定时器 */
+static pthread_t g_pt = 0;
 
 static void* _malloc2calloc(size_t size)
 {
@@ -131,14 +132,17 @@ static void* _timer_mgr_do(void *arg)
 {
 	(void)arg;
 	size_t i = 0;
-	
+	int interval = 0;
+    timer_mgr_cb_t cb = NULL;
+
 	while (true) {
 		if (!g_tm) break;
 		if (g_tm_stop) break;
 		for (i = 0; i < g_tm_max; i++) {
-			if (g_tm[i].m_interval == 0) continue;
-			g_tm[i].m_remain %= g_tm[i].m_interval;
-			if (g_tm[i].m_remain == 0) g_tm[i].m_cb(g_tm[i].m_arg);
+            interval = g_tm[i].m_interval; 
+            cb = g_tm[i].m_cb;
+			if (interval > 0) g_tm[i].m_remain %= interval;
+			if (g_tm[i].m_remain == 0 && cb) cb(g_tm[i].m_arg);
 			g_tm[i].m_remain++;
 		}
 		sleep(1);
@@ -152,8 +156,7 @@ static void* _timer_mgr_do(void *arg)
  */
 void timer_mgr_dispatch(void)
 {
-	pthread_t pt;
-	pthread_create(&pt, NULL, _timer_mgr_do, NULL);
+	pthread_create(&g_pt, NULL, _timer_mgr_do, NULL);
 }
 
 /* @func:
@@ -162,6 +165,7 @@ void timer_mgr_dispatch(void)
 void timer_mgr_stop(void)
 {
 	g_tm_stop = true;
+    pthread_join(g_pt, NULL);
 }
 
 /* ====================Test=====================*/
@@ -213,12 +217,12 @@ int main()
 	for (i = 0; i < 12; i++) {
 		if (i == 10) break;
 		if (i == 3) timer_mgr_free_by_id(id_1);
+        if (i == 5) timer_mgr_free_by_id(id_2);
 		if (i == 7) timer_mgr_free_by_cb(_cb_2);		
 		sleep(1);
 	}
 	
 	timer_mgr_stop();
-	sleep(2);
 	return 0;
 }
 #endif
