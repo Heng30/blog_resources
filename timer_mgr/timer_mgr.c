@@ -15,11 +15,18 @@
 #define TM_WARN_LOG MY_PRINTF
 #define TM_ERROR_LOG MY_PRINTF
 
+#define TM_UNUSED 0X0
+#define TM_USING 0X1
+
 #define TIMER_MAX 32 /* 最大的定时器数目 */
 
+typedef void* (*timer_mgr_alloc_t) (size_t size);
+typedef void (*timer_mgr_free_t) (void *ptr);
+
 static void* _malloc2calloc(size_t size);
+static void _free(void *ptr);
 static timer_mgr_alloc_t g_tm_alloc = _malloc2calloc;
-static timer_mgr_free_t g_tm_free = free;
+static timer_mgr_free_t g_tm_free = _free;
 static timer_mgr_t *g_tm = NULL;
 static size_t g_tm_max = TIMER_MAX;
 static bool g_tm_stop = false; /* 是否停止定时器 */
@@ -30,34 +37,38 @@ static void* _malloc2calloc(size_t size)
 	return calloc(1, size);
 }
 
+static void _free(void *ptr)
+{
+    if (!ptr) return ;
+    free(ptr);
+}
+
 static void _set_default(void)
 {
 	g_tm = NULL;
 	g_tm_max = TIMER_MAX;
 	g_tm_stop = false;
 	g_tm_alloc = _malloc2calloc;
-	g_tm_free = free;
+	g_tm_free = _free;
 }
 
 static int _find_unused(void)
 {
 	if (!g_tm) return -1;
 	size_t i = 0;
-	
+
 	for (i = 0; i < g_tm_max; i++)
-		if (g_tm[i].m_interval == 0) return i;
-		
+		if (g_tm[i].m_status == TM_UNUSED) return i;
+
 	return -1;
 }
 
 /* @func:
  *	初始化管理器
  */
-bool timer_mgr_init(size_t timer_max, timer_mgr_alloc_t alloc, timer_mgr_free_t dealloc)
+bool timer_mgr_init(size_t timer_max)
 {
 	if (timer_max > 0) g_tm_max = timer_max;
-	if (!alloc || !dealloc) g_tm_alloc = _malloc2calloc, g_tm_free = free;
-	else g_tm_alloc = alloc, g_tm_free = dealloc;
 
 	if (g_tm = g_tm_alloc(timer_max * sizeof(timer_mgr_t)), !g_tm) {
 		TM_ERROR_LOG("g_tm_alloc error, errno: %d - %s", errno, strerror(errno));
@@ -65,7 +76,7 @@ bool timer_mgr_init(size_t timer_max, timer_mgr_alloc_t alloc, timer_mgr_free_t 
 	}
 	memset(g_tm, 0, timer_max * sizeof(timer_mgr_t));
 	return true;
-	
+
 err:
 	_set_default();
 	return false;
@@ -92,7 +103,7 @@ int timer_mgr_new(timer_mgr_cb_t cb, void* arg, int interval)
 	if (!cb || interval <= 0) return -1;
 	if (!g_tm) return -1;
 	int id = 0;
-	
+
 	if (id = _find_unused(), id < 0) {
 		TM_WARN_LOG("can't find free id to register new timer");
 		return -1;
@@ -101,6 +112,7 @@ int timer_mgr_new(timer_mgr_cb_t cb, void* arg, int interval)
 	g_tm[id].m_arg = arg;
 	g_tm[id].m_interval = interval;
 	g_tm[id].m_remain = 1;
+    g_tm[id].m_status = TM_USING;
 	return id;
 }
 
@@ -110,7 +122,7 @@ int timer_mgr_new(timer_mgr_cb_t cb, void* arg, int interval)
 void timer_mgr_free_by_id(size_t id)
 {
 	if (!g_tm || id >= g_tm_max) return;
-	g_tm[id].m_interval = 0;
+	g_tm[id].m_status = TM_UNUSED;
 }
 
 /* @func:
@@ -120,30 +132,28 @@ void timer_mgr_free_by_cb(timer_mgr_cb_t cb)
 {
 	if (!g_tm || !cb) return;
 	size_t i = 0;
-	
+
 	for (i = 0; i < g_tm_max; i++)
 		if (g_tm[i].m_cb == cb) break;
-		
+
 	if (i == g_tm_max) return ;
-	g_tm[i].m_interval = 0;
+	g_tm[i].m_status = TM_UNUSED;
 }
 
 static void* _timer_mgr_do(void *arg)
 {
 	(void)arg;
 	size_t i = 0;
-	int interval = 0;
-    timer_mgr_cb_t cb = NULL;
 
 	while (true) {
 		if (!g_tm) break;
 		if (g_tm_stop) break;
 		for (i = 0; i < g_tm_max; i++) {
-            interval = g_tm[i].m_interval; 
-            cb = g_tm[i].m_cb;
-			if (interval > 0) g_tm[i].m_remain %= interval;
-			if (g_tm[i].m_remain == 0 && cb) cb(g_tm[i].m_arg);
-			g_tm[i].m_remain++;
+            if (g_tm[i].m_status == TM_UNUSED) continue;
+            if (g_tm[i].m_interval - g_tm[i].m_remain  == 0) {
+                g_tm[i].m_cb(g_tm[i].m_arg);
+                g_tm[i].m_remain = 1;
+            } else g_tm[i].m_remain++;
 		}
 		sleep(1);
 	}
@@ -205,8 +215,8 @@ int main()
 {
 	int id_1 = 0, id_2 = 0, id_3 = 0, id_4 = 0;
 	int i = 0;
-	
-	assert(timer_mgr_init(3, NULL, NULL));
+
+	assert(timer_mgr_init(3));
 	assert((id_1 = timer_mgr_new(_cb_1, NULL, 2), id_1 >= 0));
 	assert((id_2 = timer_mgr_new(_cb_2, NULL, 2), id_2 >= 0));
 	assert((id_3 = timer_mgr_new(_cb_3, NULL, 2), id_3 >= 0));
@@ -218,10 +228,10 @@ int main()
 		if (i == 10) break;
 		if (i == 3) timer_mgr_free_by_id(id_1);
         if (i == 5) timer_mgr_free_by_id(id_2);
-		if (i == 7) timer_mgr_free_by_cb(_cb_2);		
+		if (i == 7) timer_mgr_free_by_cb(_cb_2);
 		sleep(1);
 	}
-	
+
 	timer_mgr_stop();
 	return 0;
 }

@@ -140,6 +140,8 @@ void* cache_mgr_get(int id)
         g_cm[id].m_index--;
     }
     if (g_using_mutex) pthread_mutex_unlock(&g_mutex);
+
+    if (ptr) memset(ptr, 0, g_cm[id].m_size);
     return ptr;
 }
 

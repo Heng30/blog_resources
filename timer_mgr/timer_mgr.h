@@ -3,8 +3,6 @@
 #include <stdbool.h>
 
 typedef void* (*timer_mgr_cb_t)(void *arg);
-typedef void* (*timer_mgr_alloc_t) (size_t size);
-typedef void (*timer_mgr_free_t) (void *ptr);
 
 /* @desc:
  *	用于执行时间不长的定时任务，
@@ -13,6 +11,7 @@ typedef void (*timer_mgr_free_t) (void *ptr);
  */
 typedef struct _timer_mgr {
 	timer_mgr_cb_t m_cb; /* 回调函数 */ 
+    bool m_status; /* 状态，是否被启用 */
 	void *m_arg; /* 回调函数的参数 */
 	int m_interval; /* 时间间隔 */
 	int m_remain; /* 剩余时间 */
@@ -21,7 +20,7 @@ typedef struct _timer_mgr {
 /* @func:
  *	初始化管理器
  */
-bool timer_mgr_init(size_t timer_max, timer_mgr_alloc_t alloc, timer_mgr_free_t dealloc);
+bool timer_mgr_init(size_t timer_max);
 
 /* @func:
  *	销毁管理器
