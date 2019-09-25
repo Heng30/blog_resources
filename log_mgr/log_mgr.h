@@ -18,12 +18,18 @@
 #define LOG_MGR_LV_FATAL 32
 #define LOG_MGR_LV_ALL 63
 
+typedef struct _log_mgr_t {
+	char m_path[PATH_MAX];
+	size_t m_rotate_size;
+	unsigned char m_log_mask;
+	bool m_is_stdout;
+	pthread_mutex_t m_mutex;
+} log_mgr_t;
+
 /* @func:
  * 	初始化日志管理器
- * @param:
- *	path: 为NULL时，输出到标准输出
  */
-bool log_mgr_init(const char *path, size_t rotate_size, unsigned char log_mask);
+void log_mgr_init(void);
 
 /* @func:
  *	写日志文件
