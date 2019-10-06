@@ -92,6 +92,11 @@ static char _level_char_get(unsigned char level) {
 }
 
 /* @func:
+ *  获取日志管理节点
+ */
+log_mgr_t *log_mgr(void) { return &g_lm; }
+
+/* @func:
  * 	初始化日志管理器
  */
 void log_mgr_init(void) {
@@ -193,11 +198,12 @@ int main() {
   size_t i = 0;
   size_t max_num = 10240;
   pthread_t pt[10];
+  log_mgr_t *lm = log_mgr();
 
-  snprintf(g_lm.m_path, sizeof(g_lm.m_path), "%s", "/tmp/kk/test.dat");
-  g_lm.m_is_stdout = false;
-  g_lm.m_rotate_size = 1024 * 1024;
-  g_lm.m_log_mask = LOG_MGR_LV_WARN | LOG_MGR_LV_DEBUG;
+  snprintf(lm->m_path, sizeof(lm->m_path), "%s", "/tmp/kk/test.dat");
+  lm->m_is_stdout = false;
+  lm->m_rotate_size = 1024 * 1024;
+  lm->m_log_mask = LOG_MGR_LV_WARN | LOG_MGR_LV_DEBUG;
 
   log_mgr_init();
   log_mgr_dump();

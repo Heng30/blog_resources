@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <limits.h>
 
 #define LOG_MGR_LV_TRACE 1
 #define LOG_MGR_LV_DEBUG 2
@@ -25,6 +26,11 @@ typedef struct _log_mgr_t {
 	bool m_is_stdout;
 	pthread_mutex_t m_mutex;
 } log_mgr_t;
+
+/* @func:
+ *  获取日志管理节点
+ */
+log_mgr_t *log_mgr(void);
 
 /* @func:
  * 	初始化日志管理器
